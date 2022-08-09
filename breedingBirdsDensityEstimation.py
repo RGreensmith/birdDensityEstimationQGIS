@@ -7,8 +7,32 @@ from qgis.core import (QgsProcessing,
 from qgis import processing
 import pandas as pd
 
-def getSppPoints():
+#Defining constants
+layerNms = [
+    "BTO codes - Red List Species",
+    "BTO codes - Amber List Species",
+    "BTO codes - Green List Species"
+    ]
+gridTypes = ['1 km Buffer Grid','Site Boundary Grid']
+
+#Functions
+def getSppPoints(spp):
+    """
+    Create tempory shapefile or object of points pertaining to the species being looped through
+    
+    Returns: spp. points as shapefile layer?
+    """
+    processing.run(
+        "native.Split vector layer",
+        {
+        'FIELD' : 'BTO Code',
+        'FILE_TYPE' : 1,
+        'INPUT' : 'C:\\Users\\Rose Greensmith\\Biodiverse Consulting Ltd\\Projects - Documents\\BioC Projects\\2021 Projects\\Watchlaw Farm BioC22-034\\9. GIS\\Bird Report QGIS\\Breeding Bird Survey (BBS)\\Final Analysis\\BTO Bird species\\BTO codes - Green List Species - Copy.shp',
+        'OUTPUT' : 'TEMPORARY_OUTPUT'
+        }
+    )
     return sppPoints
+    
 def countPtsInPolys(sppPoints):
     """
     Counts spp points within grid squares
@@ -66,11 +90,11 @@ def densityEstimateWrapper(gridTypes,layerNms,verbose = TRUE):
         
         for sppLyr in layerNms:
             
-            idx = vectorLayer.fields().indexOf('BTO Code')
-            sppNames = vectorLayer.uniqueValues(idx)
+            idx = sppLyr.fields().indexOf('BTO Code')
+            sppNames = sppLyr.uniqueValues(idx)
             
             for spp in sppNames:
-                sppPoints = getSppPoints()
+                sppPoints = getSppPoints(spp)
                 countPtsInPolys(sppPoints)
                 randomSelection
                 
@@ -91,11 +115,5 @@ def densityEstimateWrapper(gridTypes,layerNms,verbose = TRUE):
             
         df.to_csv(path/gridName,".csv")
 
-layerNms = [
-    "BTO codes - Red List Species",
-    "BTO codes - Amber List Species",
-    "BTO codes - Green List Species"
-    ]
-gridTypes = ['1 km Buffer Grid','Site Boundary Grid']
-# Need to extract data for each species - turn into layer?
+# Executing
 densityEstimateWrapper(gridTypes,layerNms,verbose = TRUE)
