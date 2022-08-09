@@ -10,11 +10,15 @@ import pandas as pd
 def getSppPoints():
     return sppPoints
 def countPtsInPolys(sppPoints):
-    
+    """
+    Counts spp points within grid squares
+    """
     countLayer = processing.run(
         "native.Count Points in Polygon",
         {
-        'CLASSFIELD' : '', 'FIELD' : 'NUMPOINTS', 'OUTPUT' : 'TEMPORARY_OUTPUT',
+        'CLASSFIELD' : '',
+        'FIELD' : 'NUMPOINTS',
+        'OUTPUT' : 'TEMPORARY_OUTPUT',
         'POINTS' : 'sppPoints',
         'POLYGONS' : 'memory://memory?geometry=Polygon&crs=EPSG:27700&field=id:int8(0,0)&field=left:double(0,0)&field=top:double(0,0)&field=right:double(0,0)&field=bottom:double(0,0)&uid={64e1c832-26eb-46e9-ac8d-35149f5b447a}',
         'WEIGHT' : ''
@@ -50,31 +54,40 @@ def densityEstimate():
     
     return ((sumRS/countRS)*countT)*1000
 
-def densityEstimateWrapper(gridTypes,verbose):
+def densityEstimateWrapper(gridTypes,layerNms,verbose = TRUE):
     """
     Wrapper function for density estimate
     
     Returns: dataframe populated with density estimates and exports as csv
     """
+    
     df = pd.dataframe
     for gridName in gridTypes:
         
         for sppLyr in layerNms:
-            sppName
-            sppPoints = getSppPoints()
-            countPtsInPolys(sppPoints)
-            randomSelection
             
-            df[0,sppLyr] = gridName
-            df[1,sppLyr] = layerNms
-            df[1,sppLyr] = sppName
-            df[2,sppLyr] = densityEstimate()
+            idx = vectorLayer.fields().indexOf('BTO Code')
+            sppNames = vectorLayer.uniqueValues(idx)
             
-            if verbose == TRUE:
-                print("")
-                print("gridName = ",gridName,", sppName = ",sppName,", densityEstimate = ",densityEstimate)
-                print(df[,sppLyr])
-                print("")
+            for spp in sppNames:
+                sppPoints = getSppPoints()
+                countPtsInPolys(sppPoints)
+                randomSelection
+                
+                df[0,sppLyr] = gridName
+                df[1,sppLyr] = layerNms
+                df[2,sppLyr] = sppName
+                df[3,sppLyr] = densityEstimate()
+                
+                if verbose == TRUE:
+                    print("")
+                    print(
+                    "gridName = ",gridName,
+                    ", sppName = ",sppName,
+                    ", densityEstimate = ",densityEstimate
+                    )
+                    print(df[,sppLyr])
+                    print("")
             
         df.to_csv(path/gridName,".csv")
 
